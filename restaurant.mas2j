@@ -1,0 +1,18 @@
+/*
+    restaurant
+    ---------------------------
+
+    Jason Project File
+
+    This file defines the initial state of the MAS
+
+    Jason 2.5.1
+    May 11, 2022 - 23:28:18
+*/
+
+MAS restaurant {
+
+    infrastructure: Local
+
+    agents: sample_agent;
+}
