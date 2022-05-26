@@ -1,17 +1,11 @@
 /*
-   Project restaurant
-
-   Gradle build file for Jason Application
-   May 11, 2022 - 23:28:18
+   Gradle build file to create new Jason Applications
+   based on Jason 3.0
 */
 
 defaultTasks 'run'
 
 apply plugin: 'java'
-apply plugin: 'eclipse'
-
-version '1.0'
-group   'org.jason'
 
 java {
     toolchain {
@@ -21,40 +15,16 @@ java {
 
 repositories {
     mavenCentral()
-
-    //maven { url "http://jacamo.sourceforge.net/maven2" }
     maven { url "https://raw.githubusercontent.com/jacamo-lang/mvn-repo/master" }
-    maven { url "https://jade.tilab.com/maven/" }
-
-    flatDir { dirs 'lib' }
 }
 
 dependencies {
-    implementation('org.jason:jason:2.5.1')
-}
-
-sourceSets {
-    main {
-        java {
-            srcDir 'src/java'
-        }
-        resources {
-            srcDir 'src/resources'
-        }
-    }
+    implementation('org.jason:jason:3.1')
 }
 
 task run (type: JavaExec, dependsOn: 'classes') {
-    description 'runs the application'
-    main = 'jason.infra.local.RunLocalMAS'
-    args 'restaurant.mas2j'
-	// options:
-	//     args = ['restaurant.mas2j', '--debug']
-	//     args = ['restaurant.mas2j', '--log-conf', 'l.p'] // to use file l.p to configure logging
+    standardInput = System.in
+    main = 'jason.util.CreateNewProject'
+    args System.getProperty("exec.args", "").split()
     classpath sourceSets.main.runtimeClasspath
-}
-
-clean {
-    delete 'bin'
-    delete 'build'
 }
