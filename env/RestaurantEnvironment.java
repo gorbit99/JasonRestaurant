@@ -165,6 +165,13 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
         clearPercepts(agName);
         // its location
         Location l = model.getAgPos(ag);
+        Literal pos = ASSyntax.createLiteral(
+            "pos",
+            ASSyntax.createNumber(l.x),
+            ASSyntax.createNumber(l.y)
+        );
+        addPercept(agName, pos);
+
         Literal p = ASSyntax.createLiteral("activeOrders");
         List<Integer> activeOrders = model.getActiveOrders();
         for (int order : activeOrders) {
