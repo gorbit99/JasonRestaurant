@@ -41,10 +41,16 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
     }
 
     @Override
+    protected int requiredStepsForAction(String agentName, Structure action) {
+        if (!action.getFunctor().equals("do")) {
+            return super.requiredStepsForAction(agentName, action);
+        }
+        return 1;
+    }
+
+    @Override
     public boolean executeAction(String agent, Structure action) {
         int agentId = getAgNbFromName(agent);
-
-        logger.info("" + agentId);
 
         if (!action.getFunctor().equals("do")) {
             return false;
@@ -77,8 +83,6 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
 
         return true;
     }
-
-
 	
 	public RestaurantEnvironment() {
         model = new RestaurantWorldModel(
@@ -95,7 +99,7 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
     /** Called before the MAS execution with the args informed in .mas2j */
     @Override
     public void init(String[] args) {
-        super.init(new String[] { "500" });
+        super.init(new String[] { "100" });
     }
 
     /** Called before the end of MAS execution */
@@ -105,10 +109,12 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
     }
 
     int timeTillNextGuest = 0;
+    int timeTillNextDebry = 13;
 
     @Override
     protected void stepStarted(int step) {
         logger.info("---------------------Step " + step + "-----------------");
+        model.step();
 
         //Do Step
         if (timeTillNextGuest <= 0) {
@@ -117,6 +123,15 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
             timeTillNextGuest = random.nextInt(40) + 10;
         } else {
             timeTillNextGuest--;
+        }
+
+        if (timeTillNextDebry <= 0) {
+            int x = random.nextInt(worldWidth - 6 - 6) + 9;
+            int y = random.nextInt(worldWidth - 10) + 5;
+            model.placeDebry(new Location(x, y));
+            timeTillNextDebry = random.nextInt(20) + 10;
+        } else {
+            timeTillNextDebry--;
         }
     }
 

@@ -7,13 +7,12 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.Random;
 
 public class RestaurantWorldModel extends GridWorldModel {
     public static final int TABLE = 16;
     public static final int DEBRY = 32;
     public static final int COUNTER = 64;
-    
+
     public static RestaurantWorldModel model;
 
     private int agentOrders[];
@@ -51,38 +50,6 @@ public class RestaurantWorldModel extends GridWorldModel {
             }
             guestEatingTimes.remove(location);
             advanceGuestAt(location);
-        }
-
-        for (int foodId : timeToCook.keySet()) {
-            int value = timeToCook.get(foodId) - 1;
-            if (value < 0) {
-                continue;
-            }
-            if (value != 0) {
-                timeToCook.put(foodId, value);
-                continue;
-            }
-
-            boolean found = false;
-            for (int i = 0; i < counterLocations.size(); i++) {
-                if (counterFoodIds.containsKey(counterLocations.get(i))) {
-                    continue;
-                }
-
-                Location location = counterLocations.get(i);
-                counterFoodIds.put(location, foodId);
-                restaurantView.update(location);
-
-                activeOrders.remove(new Integer(foodId));
-
-                timeToCook.put(foodId, -1);
-
-                found = true;
-                break;
-            }
-            if (!found) {
-                timeToCook.put(foodId, 0);
-            }
         }
     }
 
@@ -294,9 +261,7 @@ public class RestaurantWorldModel extends GridWorldModel {
     }
 
     public void placeDebry(Location location) {
-        if (isFree(location)) {
-            add(DEBRY, location);
-        }
+        add(DEBRY, location);
     }
 
     public void removeDebry(Location location) {
@@ -351,7 +316,6 @@ public class RestaurantWorldModel extends GridWorldModel {
     }
 
     public boolean cookFood(int agentId, int foodId) {
-        timeToCook.put(foodId, 15);
         return true;
     }
 
