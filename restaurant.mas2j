@@ -17,6 +17,8 @@ MAS restaurant {
     environment: env.RestaurantEnvironment
 
     agents: 
-        cook #3;
+        cook #1;
         waiter #5;
+
+    aslSourcePath: "asl";
 }

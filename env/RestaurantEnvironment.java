@@ -31,7 +31,7 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
 
     private int getAgNbFromName(String name) {
         if (name.startsWith("cook")) {
-            return Integer.parseInt(name.substring(4)) - 1;
+            return 0;
         }
         if (name.startsWith("waiter")) {
             return Integer.parseInt(name.substring(6)) - 1 
@@ -152,7 +152,7 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
 
     private String getAgNameFromID(int agentId) {
         if (agentId < RestaurantWorldModel.cookCount) {
-            return "cook" + (agentId + 1);
+            return "cook";
         }
         return "waiter" + (agentId + 1 - RestaurantWorldModel.cookCount);
     }

@@ -16,7 +16,7 @@ public class RestaurantWorldModel extends GridWorldModel {
 
     private int agentOrders[];
 
-    public static final int cookCount = 3;
+    public static final int cookCount = 1;
     public static final int waiterCount = 5;
 
     private List<Location> tableLocations;
