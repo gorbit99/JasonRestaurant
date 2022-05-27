@@ -14,9 +14,5 @@ MAS restaurant {
 
     infrastructure: Local
 
-    environment: env.RestaurantEnvironment
-
-    agents: 
-        cook #3;
-        waiter #5;
+    agents: sample_agent;
 }
