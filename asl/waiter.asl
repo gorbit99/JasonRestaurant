@@ -1,7 +1,8 @@
 // Agent sample_agent in project restaurant
 
 last_dir(null). // the last movement I did
-state("lookingForOrders").
+
+!waitingForGuest.
 
 +!next_step(X,Y)
    :  pos(AgX,AgY)
@@ -20,4 +21,8 @@ state("lookingForOrders").
 
 /* Plans */
 
-+!start : true <- .print("Hello").
++!waitingForGuest : waitingToOrder(_,X,Y) <- !next_step(X, Y); !takeOrder(X, Y).
++!waitingForGuest : not waitingToOrder(_,X,Y) <- !waitingForGuest.
+
++!takeOrder(X, Y) : not pos(X, Y) <- !next_step(X, Y); !takeOrder(X, Y).
++!takeOrder(X, Y) : pos(X, Y) <- do(takeOrder); !waitingForGuest.

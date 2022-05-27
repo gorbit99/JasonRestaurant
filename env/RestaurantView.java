@@ -85,6 +85,8 @@ public class RestaurantView extends GridWorldView {
             return;
         }
 
+        g.setColor(Color.black);
+
         drawCenteredText(
             g,
             Integer.toString(orderId),

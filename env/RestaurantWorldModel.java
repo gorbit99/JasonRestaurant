@@ -6,6 +6,7 @@ import jason.environment.grid.Location;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class RestaurantWorldModel extends GridWorldModel {
     public static final int TABLE = 16;
@@ -17,7 +18,7 @@ public class RestaurantWorldModel extends GridWorldModel {
     private int agentOrders[];
 
     public static final int cookCount = 1;
-    public static final int waiterCount = 5;
+    public static final int waiterCount = 1;
 
     private List<Location> tableLocations;
     private List<Location> counterLocations;
@@ -322,5 +323,13 @@ public class RestaurantWorldModel extends GridWorldModel {
 
     public List<Integer> getActiveOrders() {
         return activeOrders;
+    }
+
+    public Set<Location> getGuests() {
+        return tableGuestIds.keySet();
+    }
+
+    public List<Location> getCounters() {
+        return counterLocations;
     }
 }

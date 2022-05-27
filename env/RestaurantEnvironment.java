@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.*;
 import java.util.Random;
+import java.util.Set;
 
 import env.RestaurantWorldModel.Move;
 import env.RestaurantWorldModel.TableState;
@@ -34,8 +35,7 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
             return 0;
         }
         if (name.startsWith("waiter")) {
-            return Integer.parseInt(name.substring(6)) - 1 
-                + RestaurantWorldModel.cookCount;
+            return 1;
         }
         return -1;
     }
@@ -145,6 +145,15 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
 
     @Override
     public void updateAgsPercept() {
+        List<Integer> activeOrders = model.getActiveOrders();
+        for (int order : activeOrders) {
+            Literal p = ASSyntax.createLiteral(
+                "activeOrder",
+                ASSyntax.createNumber(order)
+            );
+            addPercept(p);
+        }
+
         for (int i = 0; i < model.getNbOfAgs(); i++) {
             updateAgPercept(i);
         }
@@ -154,7 +163,7 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
         if (agentId < RestaurantWorldModel.cookCount) {
             return "cook";
         }
-        return "waiter" + (agentId + 1 - RestaurantWorldModel.cookCount);
+        return "waiter";
     }
 
     private void updateAgPercept(int ag) {
@@ -172,16 +181,52 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
         );
         addPercept(agName, pos);
 
-        Literal p = ASSyntax.createLiteral("activeOrders");
-        List<Integer> activeOrders = model.getActiveOrders();
-        for (int order : activeOrders) {
-            p.addTerm(ASSyntax.createNumber(order));
-        }
-        addPercept(agName, p);
-
         int orderOnAgent = model.getOrderOnAgent(ag);
         if (orderOnAgent != -1) {
             Literal cg = ASSyntax.createLiteral("foodOnAgent", ASSyntax.createNumber(orderOnAgent));
+            addPercept(agName, cg);
+        }
+
+        Set<Location> guests = model.getGuests();
+        for (Location location : guests) {
+            TableState state = model.getGuestStateAt(location);
+            int guestId = model.getGuestAtTable(location);
+            String percept = "";
+            switch (state) {
+                case WaitingToOrder:
+                    percept = "waitingToOrder";
+                    break;
+                case WaitingForFood:
+                    percept = "waitingForFood";
+                    break;
+                case Eating:
+                    percept = "eating";
+                    break;
+                case WaitingToPay:
+                    percept = "waitingToPay";
+                    break;
+            }
+            Literal cg = ASSyntax.createLiteral(
+                percept,
+                ASSyntax.createNumber(guestId),
+                ASSyntax.createNumber(location.x),
+                ASSyntax.createNumber(location.y)
+            );
+            addPercept(agName, cg);
+        }
+
+        List<Location> counters = model.getCounters();
+        for (Location location : counters) {
+            int counterFood = model.getCounterFoodAt(location);
+            if (counterFood == -1) {
+                continue;
+            }
+            Literal cg = ASSyntax.createLiteral(
+                "foodOnCounter",
+                ASSyntax.createNumber(counterFood),
+                ASSyntax.createNumber(location.x),
+                ASSyntax.createNumber(location.y)
+            );
             addPercept(agName, cg);
         }
 
@@ -198,10 +243,6 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
     }
 
     public static Atom aDebry = new Atom("debry");
-    public static Atom aWaitingToOrder = new Atom("waitingToOrder");
-    public static Atom aWaitingForFood = new Atom("waitingForFood");
-    public static Atom aEating = new Atom("eating");
-    public static Atom aWaitingToPay = new Atom("waitingToPay");
     public static Atom aEmpty = new Atom("empty");
 
     private void updateAgPercept(String agName, int agId, int x, int y) {
@@ -211,30 +252,7 @@ public class RestaurantEnvironment extends TimeSteppedEnvironment {
             addPercept(agName, createCellPerception(x, y, aDebry));
             isEmpty = false;
         }
-        TableState tableState = model.getGuestStateAt(new Location(x, y));
-        if (tableState != TableState.Empty) {
-            switch (tableState) {
-                case WaitingToOrder:
-                    addPercept(agName, createCellPerception(x, y, aWaitingToOrder));
-                    break;
-                case WaitingForFood:
-                    addPercept(agName, createCellPerception(x, y, aWaitingForFood));
-                    break;
-                case Eating:
-                    addPercept(agName, createCellPerception(x, y, aEating));
-                    break;
-                case WaitingToPay:
-                    addPercept(agName, createCellPerception(x, y, aWaitingToPay));
-                    break;
-            }
-            isEmpty = false;
-        }
 
-        int counterFood = model.getCounterFoodAt(new Location(x, y));
-        if (counterFood != -1) {
-            Literal cg = ASSyntax.createLiteral("foodOnCounter", ASSyntax.createNumber(counterFood));
-            addPercept(agName, cg);
-        }
 
         int otherag = model.getAgAtPos(x, y);
         if (isEmpty) {

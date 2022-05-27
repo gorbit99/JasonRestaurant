@@ -18,7 +18,7 @@ MAS restaurant {
 
     agents: 
         cook #1;
-        waiter #5;
+        waiter #1;
 
     aslSourcePath: "asl";
 }
