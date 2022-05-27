@@ -1,3 +1,5 @@
+package env;
+
 import jason.environment.grid.GridWorldView;
 import jason.environment.grid.Location;
 import jason.environment.grid.Location;
@@ -19,35 +21,6 @@ public class RestaurantView extends GridWorldView {
 
         setVisible(true);
         repaint();
-    }
-
-    @Override
-    public boolean executeAction(String agent, Structure action) {
-        int agentId = getAgNbFronName(agent);
-        
-        if (action.getFunctor().equals("up")) {
-
-        } else if (action.getFunctor().equals("down")) {
-
-        } else if (action.getFunctor().equals("left")) {
-
-        } else if (action.getFunctor().equals("right")) {
-
-        } else if (action.getFunctor().equals("takeOrder")) {
-
-        } else if (action.getFunctor().equals("pickUpFood")) {
-
-        } else if (action.getFunctor().equals("serveFood")) {
-
-        } else if (action.getFunctor().equals("takePayment")) {
-
-        } else if (action.getFunctor().equals("cleanDebry")) {
-
-        } else if (action.getFunctor().equals("cookFood")) {
-
-        } else if (action.getFunctor().equals("placeFood")) {
-
-        }
     }
 
     public void setEnvironment(RestaurantEnvironment env) {

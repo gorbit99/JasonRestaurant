@@ -1,3 +1,5 @@
+package env;
+
 import jason.environment.grid.GridWorldModel;
 import jason.environment.grid.GridWorldView;
 import jason.environment.grid.Location;
@@ -10,12 +12,16 @@ public class RestaurantWorldModel extends GridWorldModel {
     public static final int DEBRY = 32;
     public static final int COUNTER = 64;
 
+    public static RestaurantWorldModel model;
+
     private int agentOrders[];
 
     public static final int cookCount = 3;
     public static final int waiterCount = 5;
 
     private List<Location> tableLocations;
+    private List<Location> counterLocations;
+    private List<Integer> activeOrders;
 
     public enum Move {
         UP, DOWN, LEFT, RIGHT
@@ -35,6 +41,10 @@ public class RestaurantWorldModel extends GridWorldModel {
     HashMap<Location, TableState> tableGuestStates = new HashMap<>();
     HashMap<Location, Integer> counterFoodIds = new HashMap<>();
 
+    public static RestaurantWorldModel get() {
+        return model;
+    }
+
     @Override
     public void setView(GridWorldView view) {
         super.setView(view);
@@ -49,6 +59,7 @@ public class RestaurantWorldModel extends GridWorldModel {
         }
 
         initWorld(width, height);
+        model = this;
     }
 
     private void initWorld(int width, int height) {
@@ -59,6 +70,8 @@ public class RestaurantWorldModel extends GridWorldModel {
         addWall(7, 5, 7, height - 5 - 3 - 2);
         addWall(7, height - 5 - 3, 7, height - 5);
 
+        activeOrders = new ArrayList<Integer>();
+
         tableLocations = new ArrayList<Location>();
 
         for (int x = 0; x < 6; x++) {
@@ -68,8 +81,11 @@ public class RestaurantWorldModel extends GridWorldModel {
             tableLocations.add(new Location(10 + x * 3, height - 7));
         }
 
+        counterLocations = new ArrayList<Location>();
+
         for (int x = 3; x < 7; x++) {
             add(COUNTER, x, height - 5 - 5);
+            counterLocations.add(new Location(x, height - 5 - 5));
         }
 
         for (int i = 0; i < cookCount; i++) {
@@ -196,17 +212,30 @@ public class RestaurantWorldModel extends GridWorldModel {
 
     public void placeFoodFor(Location location, int id) {
         counterFoodIds.put(location, id);
-        view.update(location);
+        restaurantView.update(location);
     }
 
-    public void pickUpFood(Location location, int agentId) {
+    public boolean pickUpFood(int agentId) {
+        Location location = getAgPos(agentId);
+        if (!counterFoodIds.containsKey(location)) {
+            return false;
+        }
         int foodId = counterFoodIds.get(location);
         counterFoodIds.remove(location);
         agentOrders[agentId] = foodId;
+        return true;
     }
 
-    public void serveFood(int agentId) {
+    public boolean serveFood(int agentId) {
+        Location location = getAgPos(agentId);
+        if (!tableGuestIds.containsKey(location)) {
+            return false;
+        }
+        if (tableGuestIds.get(location) != agentOrders[agentId]) {
+            return false;
+        }
         agentOrders[agentId] = -1;
+        return true;
     }
 
     public void placeDebry(Location location) {
@@ -215,5 +244,83 @@ public class RestaurantWorldModel extends GridWorldModel {
 
     public void removeDebry(Location location) {
         remove(DEBRY, location);
+    }
+
+    public boolean takeOrder(int agentId) {
+        Location agentPos = getAgPos(agentId);
+
+        if (!hasObject(TABLE, agentPos.x, agentPos.y)) {
+            return false;
+        }
+
+        if (!isTableOccupied(agentPos)) {
+            return false;
+        }
+
+        if (tableGuestStates.get(agentPos) != TableState.WaitingToOrder) {
+            return false;
+        }
+
+        activeOrders.add(tableGuestIds.get(agentPos));
+
+        advanceGuestAt(agentPos);
+        return true;
+    }
+
+    public boolean takePayment(int agentId) {
+        Location agentPos = getAgPos(agentId);
+
+        if (!tableGuestStates.containsKey(agentPos)) {
+            return false;
+        }
+        if (tableGuestStates.get(agentPos) != TableState.WaitingToPay) {
+            return false;
+        }
+
+        advanceGuestAt(agentPos);
+        return true;
+    }
+
+    public boolean cleanDebry(int agentId) {
+        Location location = getAgPos(agentId);
+
+        if (!hasObject(DEBRY, location.x, location.y)) {
+            return false;
+        }
+
+        remove(DEBRY, location.x, location.y);
+        return true;
+    }
+
+    public boolean cookFood(int agentId, int foodId) {
+        for (int i = 0; i < counterLocations.size(); i++) {
+            if (counterFoodIds.containsKey(counterLocations.get(i))) {
+                continue;
+            }
+
+            Location location = counterLocations.get(i);
+            counterFoodIds.put(location, foodId);
+
+            activeOrders.remove(new Integer(foodId));
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public int getCounterFoodAt(Location location) {
+        if (!counterFoodIds.containsKey(location)) {
+            return -1;
+        }
+        return counterFoodIds.get(location);
+    }
+
+    public int getOrderOnAgent(int agentId) {
+        return agentOrders[agentId];
+    }
+
+    public List<Integer> getActiveOrders() {
+        return activeOrders;
     }
 }
